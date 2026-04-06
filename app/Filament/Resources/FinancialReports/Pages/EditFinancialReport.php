@@ -16,7 +16,7 @@ class EditFinancialReport extends EditRecord
     {
         return [
             Action::make('print')
-                ->label('Друк звіту')
+                ->label('Перегляд та друк звіту')
                 ->icon(Heroicon::OutlinedPrinter)
                 ->color('info')
                 ->url(fn ($record) => route('financial-reports.print', $record))

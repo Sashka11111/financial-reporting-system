@@ -93,25 +93,25 @@ class FinancialReportForm
                                 Grid::make(2)
                                     ->schema([
                                         TextInput::make('v_n1')
-                                            ->label('V_n1: Термін існування (років)')
+                                            ->label('Термін існування (років)')
                                             ->numeric(),
                                         TextInput::make('v_n2')
-                                            ->label('V_n2: Градація аналізу (0-5)')
+                                            ->label('Градація аналізу (0-5)')
                                             ->numeric()
                                             ->step(0.1)
                                             ->minValue(0)
                                             ->maxValue(5),
                                         TextInput::make('v_n3')
-                                            ->label('V_n3: Найбільша сума кредиту (Sk)')
+                                            ->label('Найбільша сума кредиту (Sk)')
                                             ->numeric(),
                                         TextInput::make('v_o1')
-                                            ->label('V_o1: Сума запитуваного кредиту (S)')
+                                            ->label('Сума запитуваного кредиту (S)')
                                             ->numeric(),
                                         TextInput::make('v_o2')
-                                            ->label('V_o2: Власні кошти в інвестицію (К)')
+                                            ->label('Власні кошти в інвестицію (К)')
                                             ->numeric(),
                                         TextInput::make('v_o3')
-                                            ->label('V_o3: Вартість ліквідного майна (М)')
+                                            ->label('Вартість ліквідного майна (М)')
                                             ->numeric(),
                                     ]),
                             ]),
