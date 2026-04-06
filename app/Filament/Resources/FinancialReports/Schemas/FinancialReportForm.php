@@ -115,6 +115,48 @@ class FinancialReportForm
                                             ->numeric(),
                                     ]),
                             ]),
+
+                        Tab::make('Ваги критеріїв (v₁..v₁₁)')
+                            ->schema([
+                                Placeholder::make('Примітка')
+                                    ->content('Вкажіть вагові коефіцієнти від 1 до 10 для кожного критерію кредитоспроможності. Нормалізація виконується автоматично. За замовчуванням усі ваги рівні (5).'),
+                                Grid::make(3)
+                                    ->schema([
+                                        TextInput::make('credit_weights.w_k1')
+                                            ->label('v₁ — K₁ Миттєва ліквідність')
+                                            ->numeric()->default(5)->minValue(1)->maxValue(10)->step(1),
+                                        TextInput::make('credit_weights.w_k2')
+                                            ->label('v₂ — K₂ Поточна ліквідність')
+                                            ->numeric()->default(5)->minValue(1)->maxValue(10)->step(1),
+                                        TextInput::make('credit_weights.w_k3')
+                                            ->label('v₃ — K₃ Загальна ліквідність')
+                                            ->numeric()->default(5)->minValue(1)->maxValue(10)->step(1),
+                                        TextInput::make('credit_weights.w_k4')
+                                            ->label('v₄ — K₄ Фінансова незалежність')
+                                            ->numeric()->default(5)->minValue(1)->maxValue(10)->step(1),
+                                        TextInput::make('credit_weights.w_k5')
+                                            ->label('v₅ — K₅ Маневреність коштів')
+                                            ->numeric()->default(5)->minValue(1)->maxValue(10)->step(1),
+                                        TextInput::make('credit_weights.w_k6')
+                                            ->label('v₆ — K₆ Рентабельність виробництва')
+                                            ->numeric()->default(5)->minValue(1)->maxValue(10)->step(1),
+                                        TextInput::make('credit_weights.w_k7')
+                                            ->label('v₇ — K₇ Діяльність минулих років')
+                                            ->numeric()->default(5)->minValue(1)->maxValue(10)->step(1),
+                                        TextInput::make('credit_weights.w_k8')
+                                            ->label('v₈ — K₈ Повернення кредиту (Sk/S)')
+                                            ->numeric()->default(5)->minValue(1)->maxValue(10)->step(1),
+                                        TextInput::make('credit_weights.w_k9')
+                                            ->label('v₉ — K₉ Термін існування')
+                                            ->numeric()->default(5)->minValue(1)->maxValue(10)->step(1),
+                                        TextInput::make('credit_weights.w_k10')
+                                            ->label('v₁₀ — K₁₀ Питома вага коштів у проекті')
+                                            ->numeric()->default(5)->minValue(1)->maxValue(10)->step(1),
+                                        TextInput::make('credit_weights.w_k11')
+                                            ->label('v₁₁ — K₁₁ Ліквідне майно (М/S)')
+                                            ->numeric()->default(5)->minValue(1)->maxValue(10)->step(1),
+                                    ]),
+                            ]),
                     ])
                     ->columnSpanFull(),
             ]);

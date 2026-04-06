@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Аналіз платоспроможності — {{ $report->company_name }}</title>
+    <title>Аналіз платоспроможності та кредитоспроможності — {{ $report->company_name }}</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -121,10 +121,35 @@
         .group-g1 { background: #1e3a6e; }
         .group-g2 { background: #14532d; }
         .group-g3 { background: #4c1d95; }
+        .group-credit { background: #1e3a5f; }
 
         /* ── Additional info ── */
         .add-table { width: 80%; margin: 0 auto 18px; }
         .add-table th { width: 5%; }
+
+        /* ── Credit assessment ── */
+        .credit-result-box {
+            border: 2px solid #1e3a5f;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            background: #f0f4ff;
+        }
+        .credit-result-box .mp-value {
+            font-size: 22pt;
+            font-weight: bold;
+            color: #1e3a5f;
+        }
+        .credit-result-box .mp-label {
+            font-size: 9pt;
+            color: #555;
+        }
+        .credit-cat-table th { background: #1e3a5f; color: #fff; font-size: 9.5pt; }
+        .credit-cat-table td { font-size: 9.5pt; }
+        .credit-cat-active td { background: #d1fae5; font-weight: bold; }
+        .mu-high { color: #166534; font-weight: bold; }
+        .mu-mid  { color: #92400e; }
+        .mu-low  { color: #991b1b; }
 
         /* ── Signature ── */
         .signature-block {
@@ -156,7 +181,7 @@
 
 
 <div class="header-block">
-    <h1 class="report-title">Аналіз платоспроможності підприємства</h1>
+    <h1 class="report-title">Аналіз платоспроможності та кредитоспроможності підприємства</h1>
     <p><strong>Підприємство:</strong> {{ $report->company_name }}</p>
     <p><strong>Дата звіту:</strong> {{ $report->report_date?->format('d.m.Y') ?? '—' }}</p>
     <p><strong>Дата складання:</strong> {{ now()->format('d.m.Y') }}</p>
@@ -469,6 +494,120 @@
             <td class="row-val">{{ number_format($indicators['g3']['k_lp'], 4) }}</td>
             <td class="row-val {{ $s['css'] }}">{{ $s['label'] }}</td>
         </tr>
+    </tbody>
+</table>
+
+
+@php
+    $credit = $report->getCreditAssessment();
+    $criteriaLabels = [
+        'K₁ — Миттєва ліквідність',
+        'K₂ — Поточна ліквідність',
+        'K₃ — Загальна ліквідність',
+        'K₄ — Фінансова незалежність',
+        'K₅ — Маневреність власних коштів',
+        'K₆ — Рентабельність виробництва',
+        'K₇ — Діяльність минулих років',
+        'K₈ — Повернення кредиту (Sk/S)',
+        'K₉ — Термін існування',
+        'K₁₀ — Питома вага коштів у проекті',
+        'K₁₁ — Ліквідне майно (М/S)',
+    ];
+@endphp
+
+<div class="page-break"></div>
+<h2 class="section-title">ОЦІНКА КРЕДИТОСПРОМОЖНОСТІ ПІДПРИЄМСТВА (НЕЧІТКА МОДЕЛЬ)</h2>
+
+
+<div class="group-header group-credit">Критерії та функції належності μ(Kᵢ)</div>
+<table class="ind-table credit-cat-table">
+    <thead>
+        <tr>
+            <th style="width:5%">№</th>
+            <th style="width:35%">Критерій</th>
+            <th style="width:12%">K<sub>i</sub></th>
+            <th style="width:12%">μ(K<sub>i</sub>)</th>
+            <th style="width:9%">v<sub>i</sub></th>
+            <th style="width:12%">w<sub>i</sub></th>
+            <th style="width:15%">w<sub>i</sub> · μ(K<sub>i</sub>)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($criteriaLabels as $idx => $label)
+            @php
+                $ki      = $credit['criteria'][$idx] ?? 0;
+                $mui     = $credit['mu'][$idx] ?? 0;
+                $vi      = $credit['raw_w'][$idx] ?? 5;
+                $wi      = $credit['w'][$idx] ?? 0;
+                $contrib = round($wi * $mui, 4);
+                $muCss   = $mui >= 0.7 ? 'mu-high' : ($mui >= 0.3 ? 'mu-mid' : 'mu-low');
+            @endphp
+            <tr>
+                <td class="row-code">{{ $idx + 1 }}</td>
+                <td>{{ $label }}</td>
+                <td class="row-val" style="font-family:monospace;">{{ number_format($ki, 4) }}</td>
+                <td class="row-val {{ $muCss }}" style="font-family:monospace;">{{ number_format($mui, 4) }}</td>
+                <td class="row-val">{{ $vi }}</td>
+                <td class="row-val" style="font-family:monospace;">{{ number_format($wi, 4) }}</td>
+                <td class="row-val" style="font-family:monospace; font-weight:bold;">{{ number_format($contrib, 4) }}</td>
+            </tr>
+        @endforeach
+        <tr style="background:#1e3a5f; color:#fff; font-weight:bold;">
+            <td colspan="6" style="padding:5px 6px;">Агрегована оцінка m(P) = Σ wᵢ · μ(Kᵢ)</td>
+            <td class="row-val" style="font-size:13pt;">{{ number_format($credit['m_p'], 4) }}</td>
+        </tr>
+    </tbody>
+</table>
+
+
+<div class="group-header group-credit">Рейтинг кредитоспроможності</div>
+
+<div class="credit-result-box">
+    <table style="margin:0; border:none;">
+        <tr>
+            <td style="border:none; padding:4px 20px 4px 0; width:160px;">
+                <div class="mp-label">Агрегована оцінка m(P)</div>
+                <div class="mp-value">{{ number_format($credit['m_p'], 4) }}</div>
+            </td>
+            <td style="border:none; padding:4px 20px 4px 0; width:120px;">
+                <div class="mp-label">Категорія якості</div>
+                <div style="font-size:18pt; font-weight:bold;">{{ $credit['category'] }}</div>
+            </td>
+            <td style="border:none; padding:4px 20px 4px 0; width:140px;">
+                <div class="mp-label">Рейтинг</div>
+                <div style="font-size:14pt; font-weight:bold;">{{ $credit['rating'] }}</div>
+            </td>
+            <td style="border:none; padding:4px; font-style:italic; font-size:10pt; color:#333;">
+                {{ $credit['description'] }}
+            </td>
+        </tr>
+    </table>
+</div>
+
+<table class="credit-cat-table" style="width:85%; margin:0 auto 18px;">
+    <thead>
+        <tr>
+            <th style="width:8%">Категорія</th>
+            <th style="width:12%">Рейтинг</th>
+            <th style="width:18%">m(P)</th>
+            <th>Опис</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach([
+            ['I',   'ААА / АА', '(0,57; 1]',   'Найвищий рівень кредитоспроможності'],
+            ['II',  'А / ВВВ',  '(0,37; 0,57]', 'Висока кредитоспроможність'],
+            ['III', 'ВВ / В',   '(0,19; 0,37]', 'Спекулятивний рейтинг'],
+            ['IV',  'ССС',      '(0,11; 0,19]', 'Можливий дефолт'],
+            ['V',   'С / RD / D','[0; 0,11]',   'Дефолт неминучий'],
+        ] as [$cat, $rat, $range, $desc])
+            <tr class="{{ $credit['category'] === $cat ? 'credit-cat-active' : '' }}">
+                <td class="row-code">{{ $cat }}</td>
+                <td class="row-code">{{ $rat }}</td>
+                <td class="row-code" style="font-family:monospace;">{{ $range }}</td>
+                <td>{{ $desc }}{{ $credit['category'] === $cat ? ' ← Ваш результат' : '' }}</td>
+            </tr>
+        @endforeach
     </tbody>
 </table>
 
